@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Siklus Air: Visual, Auditori & Kinestetik 💧</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            color: #2c3e50;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 900px;
+            height: 95vh;
+            max-height: 800px;
+            background: #f4fdff;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            z-index: 20;
+        }
+
+        .header h1 {
+            font-family: 'Fredoka One', cursive;
+            color: #0288d1;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .score-badge {
+            background: #fff3e0;
+            border: 2px solid #ffb74d;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 900;
+            color: #ef6c00;
+            font-size: 18px;
+        }
+
+        .screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto;
+        }
+        .screen.active { display: flex; }
+
+        #screen-menu {
+            align-items: center;
+            justify-content: flex-start;
+            background: linear-gradient(180deg, #81d4fa 0%, #b2ebf2 100%);
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* ==== VIDEO CONTAINER (Fix YouTube 153) ==== */
+        .video-container {
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 16/9;
+            background: #000;
+            border: 5px solid #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            margin-top: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        .video-thumbnail {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.35);
+            transition: background 0.2s;
+        }
+        .play-overlay:hover { background: rgba(0,0,0,0.5); }
+        .play-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #ff0000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        .play-btn::after {
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 28px solid #fff;
+            border-top: 18px solid transparent;
+            border-bottom: 18px solid transparent;
+            margin-left: 6px;
+        }
+
+        .learning-styles {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .style-badge {
+            background: rgba(255,255,255,0.7);
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #006064;
+            border: 2px solid #00acc1;
+        }
+
+        .btn {
+            font-family: 'Fredoka One', cursive;
+            background: #ff5252;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #d32f2f, 0 15px 20px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        .btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 #d32f2f;
+        }
+
+        .btn-audio {
+            background: #ffb300;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #ff8f00;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .btn-audio:active { transform: translateY(4px); box-shadow: 0 1px 0 #ff8f00; }
+
+        .fact-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .fact-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .fact-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 28px;
+            color: #00838f;
+            margin-bottom: 15px;
+        }
+        .fact-desc {
+            font-size: 18px;
+            color: #37474f;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .sim-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .interact-obj {
+            font-size: 100px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+        }
+        .interact-obj:active { transform: scale(0.9); filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3)); }
+
+        .progress-bar {
+            width: 80%;
+            height: 30px;
+            background: #ddd;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid #fff;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+            transition: width 0.2s;
+        }
+
+        #screen-quiz {
+            background: #f0f4c3;
+            padding: 20px;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .quiz-header {
+            font-family: 'Fredoka One', cursive;
+            color: #558b2f;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .quiz-container {
+            background: white;
+            width: 100%;
+            max-width: 700px;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .question-text {
+            font-size: 18px;
+            font-weight: 800;
+            color: #3e2723;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .option-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: #fff8e1;
+            border: 2px solid #ffe082;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #5d4037;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-btn:hover { background: #ffecb3; }
+        .option-btn.correct { background: #c8e6c9; border-color: #81c784; color: #1b5e20; }
+        .option-btn.wrong { background: #ffcdd2; border-color: #e57373; color: #b71c1c; }
+
+        .explanation {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #e1f5fe;
+            border-left: 5px solid #03a9f4;
+            border-radius: 5px;
+            font-weight: 700;
+            color: #01579b;
+        }
+
+        .mission {
+            background: linear-gradient(180deg, #e1f5fe, #b3e5fc);
+            padding: 20px;
+            align-items: center;
+            text-align: center;
+        }
+        .mission-title {
+            font-family: 'Fredoka One', cursive;
+            color: #01579b;
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+        .mission-hint {
+            font-weight: 800;
+            color: #0277bd;
+            max-width: 600px;
+            margin-bottom: 15px;
+        }
+        .slots, .pool {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 700px;
+            margin-bottom: 15px;
+        }
+        .slot {
+            width: 150px;
+            min-height: 90px;
+            border: 3px dashed #0288d1;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka One', cursive;
+            color: #0288d1;
+            font-size: 22px;
+        }
+        .slot.filled { border-style: solid; border-color: #43a047; background: #e8f5e9; }
+        .drag-card {
+            width: 150px;
+            padding: 12px 8px;
+            background: #fff;
+            border: 3px solid #ffb74d;
+            border-radius: 15px;
+            font-weight: 900;
+            color: #e65100;
+            cursor: grab;
+            touch-action: none;
+            box-shadow: 0 5px 0 #ffb74d;
+        }
+        .drag-card .ic { font-size: 34px; display: block; }
+        .drag-card.dragging {
+            position: fixed;
+            z-index: 200;
+            cursor: grabbing;
+            transform: rotate(4deg) scale(1.08);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+        }
+        .drag-card.locked { cursor: default; border-color: #43a047; color: #1b5e20; box-shadow: none; background: transparent; border: none; }
+        .drag-card.shake { animation: shake 0.4s; }
+        @keyframes shake { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        .move-card {
+            background: #fff;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 18px;
+            padding: 15px 18px;
+            margin-bottom: 12px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        .move-card .ic { font-size: 44px; }
+        .move-card .txt { flex: 1; font-weight: 800; color: #37474f; line-height: 1.4; }
+        .move-card .txt b { color: #0277bd; font-family: 'Fredoka One', cursive; font-weight: normal; font-size: 18px; }
+        .move-card.done { background: #e8f5e9; }
+        .btn-move {
+            font-family: 'Fredoka One', cursive;
+            background: #26a69a;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #00796b;
+            min-width: 110px;
+        }
+        .btn-move:active { transform: translateY(4px); box-shadow: 0 1px 0 #00796b; }
+        .btn-move:disabled { background: #9e9e9e; box-shadow: 0 5px 0 #757575; cursor: default; }
+
+        .arena {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            border-radius: 20px;
+            overflow: hidden;
+            touch-action: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            display: flex;
+        }
+        .arena-heat { background: linear-gradient(180deg, #ffcc80, #ffe0b2); }
+        .arena-rain { background: linear-gradient(180deg, #78909c, #cfd8dc); }
+        .puddle {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            padding: 20px;
+            width: 100%;
+            align-content: center;
+        }
+        .cell { height: 48px; border-radius: 50%; background: #29b6f6; transition: opacity 0.4s, transform 0.4s; }
+        .cell.gone { opacity: 0; transform: translateY(-30px) scale(0.5); }
+        .rain-drop { position: absolute; font-size: 28px; }
+        .bucket { position: absolute; bottom: 4px; font-size: 52px; left: 50%; }
+        .zone {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 18px;
+            gap: 8px;
+        }
+        .zone span { font-size: 60px; }
+        .zone.grass { background: #a5d6a7; color: #1b5e20; }
+        .zone.asphalt { background: #78909c; color: #eceff1; }
+        .drop-item { width: 70px; padding: 6px; font-size: 34px; line-height: 1.2; }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div class="header">
+        <h1>💧 Ekspedisi Air Terpadu by Rafi Ferdiansyah S.pd.</h1>
+        <div class="score-badge">Skor: <span id="score-val">0</span></div>
+    </div>
+
+    <!-- Main Menu / Video Screen -->
+    <div class="screen active" id="screen-menu">
+        <h1 style="font-family:'Fredoka One'; font-size:32px; color:#01579b; margin-bottom:5px;">Belajar Siklus Air</h1>
+
+        <div class="learning-styles">
+            <span class="style-badge">👀 Visual (Animasi)</span>
+            <span class="style-badge">👂 Auditori (Suara)</span>
+            <span class="style-badge">🖐️ Kinestetik (Sentuhan)</span>
+        </div>
+
+        <!-- Video Player (dimuat dinamis via JS untuk menghindari Error 153) -->
+        <div class="video-container" id="video-container">
+            <!-- Placeholder dengan thumbnail; klik untuk memuat video -->
+        </div>
+        <a class="btn-audio" style="text-decoration:none; margin:0 0 15px;" id="yt-link"
+           href="https://www.youtube.com/watch?v=DWt6i6zlPu0" target="_blank" rel="noopener">
+           ▶️ Buka langsung di YouTube
+        </a>
+
+        <p style="font-weight:800; color:#0277bd; font-size:16px; max-width:600px; margin-bottom: 15px;">
+            Tonton video animasi di atas untuk memahami dasar-dasarnya. Setelah siap, mari mulai simulasi interaktif dan Kuis HOTS!
+        </p>
+
+        <button class="btn" onclick="startGame()">MULAI SIMULASI 🚀</button>
+    </div>
+
+    <!-- Gameplay Area -->
+    <div class="screen" id="screen-game">
+        <div class="sim-area" id="sim-content" style="background: linear-gradient(180deg, #4fc3f7, #0288d1);">
+            <h2 style="color:white; font-family:'Fredoka One'; margin-top:20px; font-size: 30px;" id="sim-title">Tahap 1: Evaporasi</h2>
+            <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+                <div class="interact-obj" id="interact-obj" onclick="addProgress()">☀️</div>
+            </div>
+            <p style="color:white; font-weight:bold; margin-bottom:10px; font-size: 18px; text-align:center; padding:0 20px;">
+                🖐️ Kinestetik: Tap/Sentuh ikon secepat mungkin untuk menyimulasikan proses alam!
+            </p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="sim-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Misi 1 -->
+    <div class="screen mission" id="screen-order">
+        <div class="mission-title">🧩 Misi 1: Susun Siklus Air</div>
+        <p class="mission-hint">🖐️ Seret kartu ke kotak yang tepat, dari tahap 1 sampai tahap 4!</p>
+        <div class="slots" id="order-slots"></div>
+        <div class="pool" id="order-pool"></div>
+        <button class="btn" id="order-next" style="display:none; padding:10px 30px; font-size:20px;" onclick="startBody()">Lanjut ➡️</button>
+    </div>
+
+    <!-- Misi 2 -->
+    <div class="screen mission" id="screen-body">
+        <div class="mission-title">🕺 Misi 2: Jadilah Tetesan Air!</div>
+        <p class="mission-hint">Berdiri dan peragakan tiap tahap selama 10 detik. Pastikan ada ruang untuk bergerak ya!</p>
+        <div id="move-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+        <button class="btn" id="body-next" style="display:none; padding:10px 30px; font-size:20px;" onclick="startArena(0)">Ke Misi 3 🎯</button>
+    </div>
+
+    <!-- Misi 3 -->
+    <div class="screen mission" id="screen-arena">
+        <div class="mission-title" id="arena-title"></div>
+        <p class="mission-hint" id="arena-hint"></p>
+        <div class="arena" id="arena"></div>
+        <div class="pool" id="arena-pool" style="margin-top:15px;"></div>
+        <div id="arena-status" style="font-weight:900; color:#01579b; font-size:18px;"></div>
+    </div>
+
+    <!-- Quiz -->
+    <div class="screen" id="screen-quiz">
+        <div class="quiz-header">Ujian Analisis (HOTS) 🧠</div>
+        <div class="quiz-container">
+            <div id="q-counter" style="font-weight:bold; color:#8bc34a; margin-bottom:10px;">Soal 1 dari 5</div>
+            <div class="question-text" id="q-text">Pertanyaan</div>
+            <button class="btn-audio" onclick="readText(document.getElementById('q-text').innerText)">🔊 Bacakan Soal</button>
+            <div id="options-container" style="margin-top: 15px;"></div>
+            <div class="explanation" id="q-explain">
+                <span id="explain-text">Penjelasan</span><br>
+                <button class="btn-audio" style="font-size: 14px; padding: 5px 15px;" onclick="readText(document.getElementById('explain-text').innerText)">🔊 Bacakan Penjelasan</button>
+            </div>
+            <button class="btn" id="next-q-btn" style="display:none; padding:10px 30px; font-size:18px; margin-top:20px; margin-left:auto; margin-right:0;" onclick="nextQuestion()">Lanjut ➡️</button>
+        </div>
+    </div>
+
+    <!-- Facts Modal -->
+    <div class="fact-modal" id="fact-modal">
+        <div class="fact-card">
+            <div class="fact-title" id="fact-title">Fakta Mendalam</div>
+            <div class="fact-desc" id="fact-desc">Penjelasan saintifik.</div>
+            <button class="btn-audio" style="margin-bottom: 20px;" onclick="readText(document.getElementById('fact-desc').innerText)">🔊 Bacakan Teks (Auditori)</button>
+            <br>
+            <button class="btn" style="padding:10px 30px; font-size:20px;" onclick="closeFactModal()">Mulai Simulasi 🖐️</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    let currentStage = 0;
+    let progress = 0;
+    let currentQ = 0;
+
+    const VIDEO_ID = 'DWt6i6zlPu0';
+    const VIDEO_URL = 'https://www.youtube.com/watch?v=' + VIDEO_ID;
+
+    // ==== FIX YOUTUBE ERROR 153 ====
+    // Strategi:
+    // 1. Deteksi protokol. Jika file:// (lokal), langsung pakai thumbnail + link keluar.
+    // 2. Jika http/https, muat iframe dengan parameter origin sesuai lokasi.
+    // 3. Tambah fallback pesan error jika iframe gagal.
+    (function initVideo() {
+        const container = document.getElementById('video-container');
+        const isFileProtocol = window.location.protocol === 'file:';
+        const origin = window.location.origin && window.location.origin !== 'null'
+            ? window.location.origin
+            : '';
+
+        // Thumbnail YouTube (kualitas tinggi)
+        const thumbUrl = 'https://img.youtube.com/vi/' + VIDEO_ID + '/hqdefault.jpg';
+
+        if (isFileProtocol) {
+            // === FILE:// mode: klik langsung buka YouTube ===
+            container.innerHTML = `
+                <img class="video-thumbnail" src="${thumbUrl}" alt="Thumbnail video siklus air"
+                     onerror="this.style.display='none'">
+                <div class="play-overlay">
+                    <div class="play-btn"></div>
+                </div>
+            `;
+            container.addEventListener('click', () => {
+                window.open(VIDEO_URL, '_blank', 'noopener');
+            });
+            return;
+        }
+
+        // === HTTP/HTTPS mode: tampilkan thumbnail, klik untuk memuat iframe ===
+        container.innerHTML = `
+            <img class="video-thumbnail" src="${thumbUrl}" alt="Thumbnail video siklus air"
+                 onerror="this.style.display='none'">
+            <div class="play-overlay">
+                <div class="play-btn"></div>
+            </div>
+        `;
+
+        let loaded = false;
+        container.addEventListener('click', function loadVideo() {
+            if (loaded) return;
+            loaded = true;
+
+            const params = new URLSearchParams({
+                rel: '0',
+                autoplay: '1',
+                modestbranding: '1',
+                playsinline: '1'
+            });
+            if (origin) params.set('origin', origin);
+
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://www.youtube-nocookie.com/embed/' + VIDEO_ID + '?' + params.toString();
+            iframe.title = 'Video animasi siklus air';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+            iframe.allowFullscreen = true;
+            iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+
+            container.innerHTML = '';
+            container.appendChild(iframe);
+            container.style.cursor = 'default';
+        });
+    })();
+
+    // --- Audio Synthesis (TTS) ---
+    function readText(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            window.speechSynthesis.speak(utterance);
+        } else {
+            alert("Maaf, browser kamu tidak mendukung fitur suara.");
+        }
+    }
+
+    function stopAudio() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    // --- SFX Web Audio ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const actx = new AudioContext();
+
+    function playTone(freq, type, duration) {
+        try {
+            if (actx.state === 'suspended') actx.resume();
+            const osc = actx.createOscillator();
+            const gain = actx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, actx.currentTime);
+
+            gain.gain.setValueAtTime(0.1, actx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + duration);
+
+            osc.connect(gain);
+            gain.connect(actx.destination);
+            osc.start();
+            osc.stop(actx.currentTime + duration);
+        } catch (e) { /* silent */ }
+    }
+
+    // --- Data Stage ---
+    const stages = [
+        {
+            title: "Tahap 1: Evaporasi & Transpirasi",
+            icon: "☀️",
+            color: "linear-gradient(180deg, #4fc3f7, #0288d1)",
+            factTitle: "Bukan Cuma Air Laut! 🌊🌳",
+            factDesc: "Evaporasi terjadi saat panas matahari mengubah air laut menjadi gas (uap air). Tapi, tumbuhan juga 'berkeringat' lho! Proses tumbuhan melepaskan uap air dari daunnya disebut TRANSPIRASI."
+        },
+        {
+            title: "Tahap 2: Kondensasi",
+            icon: "☁️",
+            color: "linear-gradient(180deg, #90caf9, #e3f2fd)",
+            factTitle: "Mengapa Terbentuk Awan? ☁️",
+            factDesc: "Semakin tinggi uap air naik ke langit, suhunya makin dingin. Suhu dingin ini memaksa uap air menyusut menjadi titik-titik air kecil. Kumpulan miliaran titik air inilah yang membentuk AWAN."
+        },
+        {
+            title: "Tahap 3: Presipitasi",
+            icon: "🌧️",
+            color: "linear-gradient(180deg, #546e7a, #78909c)",
+            factTitle: "Hujan Tak Selalu Air! 🌧️❄️",
+            factDesc: "Saat awan menampung terlalu banyak air, ia menjadi sangat berat. Gravitasi bumi menariknya jatuh sebagai PRESIPITASI. Ini bisa berupa hujan air, butiran salju, atau bahkan hujan es!"
+        },
+        {
+            title: "Tahap 4: Infiltrasi & Run-off",
+            icon: "🌱",
+            color: "linear-gradient(180deg, #81c784, #5d4037)",
+            factTitle: "Spons Alami Bumi 🌱🪨",
+            factDesc: "Air hujan diserap oleh pori-pori tanah dan akar pohon (Infiltrasi). Jika tanah tertutup aspal, air tidak bisa meresap dan akan mengalir deras di permukaan (Run-off), yang bisa menyebabkan banjir."
+        }
+    ];
+
+    const hotsQuiz = [
+        {
+            q: "Sebuah kota melakukan pembangunan besar dengan mengganti seluruh taman berumput dengan aspal. Berdasarkan siklus air, dampak paling berbahaya dari perubahan ini adalah...",
+            options: [
+                "A. Kondensasi awan memicu hujan salju lebat.",
+                "B. Berhentinya proses evaporasi dari sungai.",
+                "C. Menurunnya laju infiltrasi ke tanah secara drastis, memicu banjir run-off.",
+                "D. Tumbuhan melakukan transpirasi lebih cepat."
+            ],
+            ans: 2,
+            explain: "Aspal menutup tanah. Akibatnya, tahap Infiltrasi (penyerapan air) terganggu. Air hujan menggenang di permukaan, memicu banjir."
+        },
+        {
+            q: "Pemanasan global menyebabkan suhu bumi terus meningkat. Bagaimana fenomena ini mempengaruhi keseimbangan siklus air?",
+            options: [
+                "A. Siklus air berhenti karena laut mengering.",
+                "B. Evaporasi meningkat drastis; memicu kekeringan, tapi juga badai hujan ekstrem di daerah lain.",
+                "C. Kondensasi terhenti karena butuh suhu panas.",
+                "D. Presipitasi hanya turun dalam bentuk es."
+            ],
+            ans: 1,
+            explain: "Suhu panas mempercepat evaporasi. Tanah cepat kering, tapi uap air di awan menjadi sangat padat, memicu hujan badai ekstrem saat presipitasi turun."
+        },
+        {
+            q: "Di hutan hujan lebat, jika terjadi penebangan liar (deforestasi) besar-besaran, curah hujan lama-kelamaan akan menurun. Mengapa hal ini bisa terjadi?",
+            options: [
+                "A. Hilangnya pepohonan mengurangi transpirasi, sehingga pasokan uap air untuk awan berkurang.",
+                "B. Air hujan langsung meresap ke inti bumi.",
+                "C. Matahari terhalang oleh batang pohon tebangan.",
+                "D. Awan tidak memiliki tempat untuk bersembunyi."
+            ],
+            ans: 0,
+            explain: "Pohon menyumbang uap air ke atmosfer (Transpirasi). Hutan ditebang = transpirasi hilang = awan sulit terbentuk = curah hujan menurun drastis."
+        }
+    ];
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function startGame() {
+        stopAudio();
+        currentStage = 0;
+        score = 0;
+        document.getElementById('score-val').innerText = score;
+        showScreen('screen-game');
+        loadStage();
+    }
+
+    function loadStage() {
+        stopAudio();
+        if (currentStage >= stages.length) {
+            startOrder();
+            return;
+        }
+
+        progress = 0;
+        document.getElementById('sim-progress').style.width = '0%';
+
+        const stg = stages[currentStage];
+        document.getElementById('sim-content').style.background = stg.color;
+        document.getElementById('sim-title').innerText = stg.title;
+        document.getElementById('interact-obj').innerText = stg.icon;
+
+        document.getElementById('fact-title').innerText = stg.factTitle;
+        document.getElementById('fact-desc').innerText = stg.factDesc;
+        document.getElementById('fact-modal').style.display = 'flex';
+    }
+
+    function closeFactModal() {
+        stopAudio();
+        document.getElementById('fact-modal').style.display = 'none';
+    }
+
+    function addProgress() {
+        progress += 10;
+        document.getElementById('sim-progress').style.width = progress + '%';
+        playTone(300 + (progress * 5), 'sine', 0.1);
+
+        if (progress >= 100) {
+            score += 50;
+            document.getElementById('score-val').innerText = score;
+            playTone(800, 'square', 0.3);
+            currentStage++;
+            setTimeout(loadStage, 500);
+        }
+    }
+
+    // --- Misi 1: Susun Siklus ---
+    const orderCards = [
+        { ic: "☀️", name: "Evaporasi" },
+        { ic: "☁️", name: "Kondensasi" },
+        { ic: "🌧️", name: "Presipitasi" },
+        { ic: "🌱", name: "Infiltrasi" }
+    ];
+    let placed = 0, dragEl = null, dragOffX = 0, dragOffY = 0;
+
+    function startOrder() {
+        stopAudio();
+        showScreen('screen-order');
+        placed = 0;
+        document.getElementById('order-next').style.display = 'none';
+        const slots = document.getElementById('order-slots');
+        const pool = document.getElementById('order-pool');
+        slots.innerHTML = '';
+        pool.innerHTML = '';
+        orderCards.forEach((c, i) => {
+            const s = document.createElement('div');
+            s.className = 'slot';
+            s.dataset.idx = i;
+            s.innerText = 'Tahap ' + (i + 1);
+            slots.appendChild(s);
+        });
+        orderCards.map((c, i) => ({ c, i })).sort(() => Math.random() - 0.5).forEach(o => {
+            const d = document.createElement('div');
+            d.className = 'drag-card';
+            d.dataset.idx = o.i;
+            d.innerHTML = '<span class="ic">' + o.c.ic + '</span>' + o.c.name;
+            d.addEventListener('pointerdown', dragStart);
+            d.addEventListener('pointermove', dragMove);
+            d.addEventListener('pointerup', dragEnd);
+            d.addEventListener('pointercancel', dragEnd);
+            pool.appendChild(d);
+        });
+    }
+
+    function dragStart(e) {
+        if (this.classList.contains('locked')) return;
+        dragEl = this;
+        const r = this.getBoundingClientRect();
+        dragOffX = e.clientX - r.left;
+        dragOffY = e.clientY - r.top;
+        this.style.width = r.width + 'px';
+        this.classList.add('dragging');
+        this.style.left = r.left + 'px';
+        this.style.top = r.top + 'px';
+        try { this.setPointerCapture(e.pointerId); } catch (err) {}
+        playTone(400, 'sine', 0.08);
+    }
+
+    function dragMove(e) {
+        if (dragEl !== this) return;
+        this.style.left = (e.clientX - dragOffX) + 'px';
+        this.style.top = (e.clientY - dragOffY) + 'px';
+    }
+
+    function dragEnd(e) {
+        if (dragEl !== this) return;
+        const card = this;
+        dragEl = null;
+        card.classList.remove('dragging');
+        card.style.left = card.style.top = card.style.width = '';
+        const target = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList.contains('slot'));
+        if (target && !target.classList.contains('filled')) {
+            if (target.dataset.idx === card.dataset.idx) {
+                target.innerHTML = '';
+                target.classList.add('filled');
+                card.classList.add('locked');
+                target.appendChild(card);
+                score += 25;
+                document.getElementById('score-val').innerText = score;
+                playTone(700, 'triangle', 0.3);
+                placed++;
+                if (placed === orderCards.length) {
+                    playTone(900, 'square', 0.3);
+                    document.getElementById('order-next').style.display = 'block';
+                }
+                return;
+            }
+            playTone(200, 'sawtooth', 0.3);
+            card.classList.add('shake');
+            setTimeout(() => card.classList.remove('shake'), 400);
+        }
+    }
+
+    // --- Misi 2: Peragakan ---
+    const bodyMoves = [
+        { ic: "☀️", t: "Evaporasi", d: "Jongkok, lalu berdiri perlahan sambil mengangkat kedua tangan tinggi. Kamu uap air yang naik ke langit!" },
+        { ic: "☁️", t: "Kondensasi", d: "Bulatkan kedua lenganmu di atas kepala dan goyangkan tubuh pelan. Kamu awan yang penuh titik air!" },
+        { ic: "🌧️", t: "Presipitasi", d: "Turunkan kedua tangan dari atas ke bawah sambil menggerakkan jari seperti hujan yang jatuh." },
+        { ic: "🌱", t: "Infiltrasi", d: "Jongkok, sentuh lantai, lalu rapatkan tubuh seolah meresap ke tanah dan menjadi akar." }
+    ];
+    let movesDone = 0;
+
+    function startBody() {
+        stopAudio();
+        showScreen('screen-body');
+        movesDone = 0;
+        document.getElementById('body-next').style.display = 'none';
+        const list = document.getElementById('move-list');
+        list.innerHTML = '';
+        bodyMoves.forEach((m, i) => {
+            const c = document.createElement('div');
+            c.className = 'move-card';
+            c.id = 'move-' + i;
+            c.innerHTML = '<div class="ic">' + m.ic + '</div>' +
+                '<div class="txt"><b>' + m.t + '</b><br>' + m.d + '</div>' +
+                '<button class="btn-move" id="move-btn-' + i + '" onclick="doMove(' + i + ')">Mulai 10 detik</button>';
+            list.appendChild(c);
+        });
+    }
+
+    function doMove(i) {
+        const btn = document.getElementById('move-btn-' + i);
+        btn.disabled = true;
+        let left = 10;
+        btn.innerText = left + ' detik...';
+        const timer = setInterval(() => {
+            left--;
+            playTone(400 + (10 - left) * 40, 'sine', 0.08);
+            if (left > 0) {
+                btn.innerText = left + ' detik...';
+                return;
+            }
+            clearInterval(timer);
+            btn.innerText = 'Selesai ✅';
+            document.getElementById('move-' + i).classList.add('done');
+            score += 25;
+            document.getElementById('score-val').innerText = score;
+            playTone(800, 'square', 0.3);
+            movesDone++;
+            if (movesDone === bodyMoves.length) {
+                document.getElementById('body-next').style.display = 'block';
+            }
+        }, 1000);
+    }
+
+    // --- Misi 3: Arena ---
+    let arenaIdx = 0, arenaTimer = null, arenaRaf = null, arenaLocked = false;
+
+    function stopArena() {
+        clearInterval(arenaTimer);
+        cancelAnimationFrame(arenaRaf);
+    }
+
+    function setStatus(t) { document.getElementById('arena-status').innerText = t; }
+
+    function startArena(n) {
+        stopAudio();
+        stopArena();
+        if (n >= 3) { startQuiz(); return; }
+        arenaIdx = n;
+        arenaLocked = false;
+        showScreen('screen-arena');
+        const arena = document.getElementById('arena');
+        arena.innerHTML = '';
+        arena.onpointermove = arena.onpointerdown = null;
+        document.getElementById('arena-pool').innerHTML = '';
+        setStatus('');
+        [gamePanas, gameHujan, gameSerap][n](arena);
+    }
+
+    function arenaDone(bonus) {
+        if (arenaLocked) return;
+        arenaLocked = true;
+        stopArena();
+        score += bonus;
+        document.getElementById('score-val').innerText = score;
+        playTone(900, 'square', 0.3);
+        setStatus('Hebat! 🎉 +' + bonus + ' poin');
+        setTimeout(() => startArena(arenaIdx + 1), 1400);
+    }
+
+    function gamePanas(arena) {
+        document.getElementById('arena-title').innerText = '🔥 Misi 3a: Panaskan Genangan';
+        document.getElementById('arena-hint').innerText = 'Usap layar dengan jarimu seperti sinar matahari sampai semua genangan menguap!';
+        arena.className = 'arena arena-heat';
+        let html = '<div class="puddle">';
+        for (let i = 0; i < 24; i++) html += '<div class="cell"></div>';
+        arena.innerHTML = html + '</div><div style="position:absolute; top:6px; right:12px; font-size:44px;">☀️</div>';
+        let left = 24;
+        setStatus('Genangan tersisa: ' + left);
+        arena.onpointermove = arena.onpointerdown = e => {
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            if (el && el.classList.contains('cell') && !el.classList.contains('gone')) {
+                el.classList.add('gone');
+                left--;
+                playTone(500 + (24 - left) * 20, 'sine', 0.06);
+                setStatus('Genangan tersisa: ' + left);
+                if (left === 0) arenaDone(50);
+            }
+        };
+    }
+
+    function gameHujan(arena) {
+        document.getElementById('arena-title').innerText = '🪣 Misi 3b: Tangkap Hujan';
+        document.getElementById('arena-hint').innerText = 'Geser ember ke kiri dan kanan untuk menangkap 8 tetes hujan!';
+        arena.className = 'arena arena-rain';
+        arena.innerHTML = '<div style="position:absolute; top:0; width:100%; text-align:center; font-size:50px;">☁️☁️☁️</div><div class="bucket" id="bucket">🪣</div>';
+        const bucket = document.getElementById('bucket');
+        let bx = arena.clientWidth / 2, caught = 0, drops = [];
+        bucket.style.left = (bx - 26) + 'px';
+        setStatus('Tertangkap: 0 / 8');
+        arena.onpointermove = arena.onpointerdown = e => {
+            bx = Math.max(26, Math.min(arena.clientWidth - 26, e.clientX - arena.getBoundingClientRect().left));
+            bucket.style.left = (bx - 26) + 'px';
+        };
+        arenaTimer = setInterval(() => {
+            const el = document.createElement('div');
+            el.className = 'rain-drop';
+            el.innerText = '💧';
+            const d = { el, x: 20 + Math.random() * (arena.clientWidth - 40), y: 40, v: 3 + Math.random() * 2 };
+            el.style.left = d.x + 'px';
+            arena.appendChild(el);
+            drops.push(d);
+        }, 700);
+        function loop() {
+            drops = drops.filter(d => {
+                d.y += d.v;
+                d.el.style.top = d.y + 'px';
+                if (d.y > arena.clientHeight - 70 && Math.abs(d.x - bx) < 45) {
+                    d.el.remove();
+                    caught++;
+                    playTone(600 + caught * 40, 'triangle', 0.15);
+                    setStatus('Tertangkap: ' + caught + ' / 8');
+                    return false;
+                }
+                if (d.y > arena.clientHeight) { d.el.remove(); return false; }
+                return true;
+            });
+            if (caught >= 8) { arenaDone(50); return; }
+            arenaRaf = requestAnimationFrame(loop);
+        }
+        arenaRaf = requestAnimationFrame(loop);
+    }
+
+    function gameSerap(arena) {
+        document.getElementById('arena-title').innerText = '🌳 Misi 3c: Serap atau Banjir?';
+        document.getElementById('arena-hint').innerText = 'Seret 5 tetes air ke tempat yang bisa menyerapnya. Pilih dengan hati-hati!';
+        arena.className = 'arena';
+        arena.innerHTML = '<div class="zone grass"><span>🌳</span>Tanah berumput</div><div class="zone asphalt"><span>🏙️</span>Aspal</div>';
+        const pool = document.getElementById('arena-pool');
+        let absorbed = 0;
+        setStatus('Terserap: 0 / 5');
+        for (let i = 0; i < 5; i++) {
+            const d = document.createElement('div');
+            d.className = 'drag-card drop-item';
+            d.innerText = '💧';
+            d.addEventListener('pointerdown', dragStart);
+            d.addEventListener('pointermove', dragMove);
+            d.addEventListener('pointercancel', dragEnd);
+            d.addEventListener('pointerup', e => {
+                if (dragEl !== d) return;
+                dragEl = null;
+                d.classList.remove('dragging');
+                d.style.left = d.style.top = d.style.width = '';
+                const z = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList.contains('zone'));
+                if (!z) return;
+                if (z.classList.contains('grass')) {
+                    d.remove();
+                    absorbed++;
+                    playTone(650, 'triangle', 0.25);
+                    setStatus('Terserap: ' + absorbed + ' / 5');
+                    if (absorbed === 5) arenaDone(50);
+                } else {
+                    playTone(200, 'sawtooth', 0.3);
+                    d.classList.add('shake');
+                    setTimeout(() => d.classList.remove('shake'), 400);
+                    setStatus('Aspal tidak menyerap air, jadi mengalir deras (run-off) dan bisa banjir! 🌊');
+                }
+            });
+            pool.appendChild(d);
+        }
+    }
+
+    // --- Quiz ---
+    function startQuiz() {
+        stopAudio();
+        showScreen('screen-quiz');
+        currentQ = 0;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentQ >= hotsQuiz.length) {
+            finishGame();
+            return;
+        }
+
+        const qData = hotsQuiz[currentQ];
+        document.getElementById('q-counter').innerText = `Soal Analisis ${currentQ + 1} dari ${hotsQuiz.length}`;
+        document.getElementById('q-text').innerText = qData.q;
+
+        const optsDiv = document.getElementById('options-container');
+        optsDiv.innerHTML = '';
+
+        document.getElementById('q-explain').style.display = 'none';
+        document.getElementById('next-q-btn').style.display = 'none';
+
+        qData.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn, qData.ans, qData.explain);
+            optsDiv.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIdx, btnNode, correctIdx, explanation) {
+        stopAudio();
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+        if (selectedIdx === correctIdx) {
+            btnNode.classList.add('correct');
+            score += 100;
+            document.getElementById('score-val').innerText = score;
+            playTone(700, 'triangle', 0.3);
+        } else {
+            btnNode.classList.add('wrong');
+            allBtns[correctIdx].classList.add('correct');
+            playTone(200, 'sawtooth', 0.4);
+        }
+
+        document.getElementById('explain-text').innerText = explanation;
+        document.getElementById('q-explain').style.display = 'block';
+        document.getElementById('next-q-btn').style.display = 'block';
+
+        readText(explanation);
+    }
+
+    function nextQuestion() {
+        stopAudio();
+        currentQ++;
+        loadQuestion();
+    }
+
+    function finishGame() {
+        stopAudio();
+        const container = document.getElementById('screen-quiz');
+        playTone(600, 'sine', 0.2);
+        setTimeout(() => playTone(800, 'sine', 0.2), 200);
+        setTimeout(() => playTone(1000, 'sine', 0.5), 400);
+
+        container.innerHTML = `
+            <div style="text-align:center; padding: 40px 20px;">
+                <h1 style="font-family:'Fredoka One'; color:#2e7d32; font-size:36px; margin-bottom:20px;">🏆 Luar Biasa!</h1>
+                <p style="font-size:20px; font-weight:800; color:#3e2723; margin-bottom:30px;">
+                    Kamu telah menyelesaikan Ekspedisi Terpadu Siklus Air!<br><br>
+                    Skor Akhir Kamu: <span style="font-size:40px; color:#ef6c00;">${score}</span>
+                </p>
+                <button class="btn" onclick="location.reload()">Main Lagi 🔄</button>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
